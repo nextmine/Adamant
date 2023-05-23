@@ -69,6 +69,10 @@ func Process(conn *net.UDPConn, addr *net.UDPAddr, data []byte) {
 			Security:   false,
 		}
 
+		clientIP := addr.IP
+		clientPort := addr.Port
+		log.Printf("IP клиента: %s, порт клиента: %d", clientIP.String(), clientPort)
+
 		response := WriteOpenConnectionReply2(reply2)
 		_, err = conn.WriteToUDP(response, addr)
 		if err != nil {
