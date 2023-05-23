@@ -33,6 +33,25 @@ func Process(conn *net.UDPConn, addr *net.UDPAddr, data []byte) {
 		if err != nil {
 			log.Println("Ошибка при отправке UnconnectedPong:", err)
 		}
+	case 0x05: // OpenConnectionRequest1
+		req1, err := ReadOpenConnectionRequest1(data)
+		if err != nil {
+			log.Println("Ошибка при чтении OpenConnectionRequest1:", err)
+			return
+		}
+
+		reply1 := &OpenConnectionReply1{
+			Magic:      req1.Magic,
+			ServerGUID: req1.ClientGUID + 12345, // Взять реальный ServerGUID из конфигурации сервера
+			Security:   false,
+			MTU:        req1.MTU,
+		}
+
+		response := WriteOpenConnectionReply1(reply1)
+		_, err = conn.WriteToUDP(response, addr)
+		if err != nil {
+			log.Println("Ошибка при отправке OpenConnectionReply1:", err)
+		}
 	default:
 		log.Printf("Неизвестный пакет с ID 0x%02x\n", packetID)
 	}
