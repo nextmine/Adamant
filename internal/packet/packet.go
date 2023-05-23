@@ -40,6 +40,8 @@ func Process(conn *net.UDPConn, addr *net.UDPAddr, data []byte) {
 			return
 		}
 
+		log.Printf("Протокол клиента: %d\n", req1.Protocol)
+
 		reply1 := &OpenConnectionReply1{
 			Magic:      req1.Magic,
 			ServerGUID: req1.ClientGUID + 12345, // Взять реальный ServerGUID из конфигурации сервера

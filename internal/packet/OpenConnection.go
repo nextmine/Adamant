@@ -22,7 +22,6 @@ type OpenConnectionReply1 struct {
 	MTU        int16
 }
 
-// ReadOpenConnectionRequest1 - функция для чтения пакета OpenConnectionRequest1
 func ReadOpenConnectionRequest1(data []byte) (*OpenConnectionRequest1, error) {
 	if len(data) < 22 {
 		return nil, errors.New("неверный размер пакета OpenConnectionRequest1")
@@ -32,7 +31,11 @@ func ReadOpenConnectionRequest1(data []byte) (*OpenConnectionRequest1, error) {
 	copy(req1.Magic[:], data[1:17])
 	req1.Protocol = data[17]
 	nullPayloadEnd := 18
-	for ; data[nullPayloadEnd] == 0x00; nullPayloadEnd++ {
+	for nullPayloadEnd < len(data) && data[nullPayloadEnd] == 0x00 {
+		nullPayloadEnd++
+	}
+	if nullPayloadEnd >= len(data) {
+		return nil, errors.New("неправильный формат пакета OpenConnectionRequest1")
 	}
 	req1.NullPayload = data[18:nullPayloadEnd]
 	req1.ClientGUID = int64(binary.BigEndian.Uint64(data[nullPayloadEnd : nullPayloadEnd+8]))
