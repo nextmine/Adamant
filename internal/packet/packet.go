@@ -39,7 +39,7 @@ func Process(conn *net.UDPConn, addr *net.UDPAddr, data []byte) {
 			log.Println("Ошибка при чтении OpenConnectionRequest1:", err)
 			return
 		}
-
+		log.Println("Подключается новый клиент")
 		log.Printf("Протокол клиента: %d\n", req1.Protocol)
 
 		reply1 := &OpenConnectionReply1{
@@ -53,6 +53,26 @@ func Process(conn *net.UDPConn, addr *net.UDPAddr, data []byte) {
 		_, err = conn.WriteToUDP(response, addr)
 		if err != nil {
 			log.Println("Ошибка при отправке OpenConnectionReply1:", err)
+		}
+	case 0x07: // OpenConnectionRequest2
+		req2, err := ReadOpenConnectionRequest2(data)
+		if err != nil {
+			log.Println("Ошибка при чтении OpenConnectionRequest2:", err)
+			return
+		}
+
+		reply2 := &OpenConnectionReply2{
+			Magic:      req2.Magic,
+			ServerGUID: req2.ClientGUID + 12345, // Взять реальный ServerGUID из конфигурации сервера
+			ClientAddr: *addr,
+			MTU:        1500,
+			Security:   false,
+		}
+
+		response := WriteOpenConnectionReply2(reply2)
+		_, err = conn.WriteToUDP(response, addr)
+		if err != nil {
+			log.Println("Ошибка при отправке OpenConnectionReply2:", err)
 		}
 	default:
 		log.Printf("Неизвестный пакет с ID 0x%02x\n", packetID)
